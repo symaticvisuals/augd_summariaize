@@ -1,0 +1,6 @@
+summary: Create Post
+tasks:
+  - id: mongo_post_create
+    fn: datasource.mongo.Post.create
+    args:
+      data: <% inputs.body %>

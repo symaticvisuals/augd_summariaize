@@ -1,0 +1,182 @@
+version: "3.7"
+
+services:
+  node:
+    command: bash -c "sleep infinity"
+    build:
+      context: .
+      args:
+        USER_UID: <%=userUID%>
+    environment:
+      - SHELL=/bin/bash
+      - INSIDE_CONTAINER=true
+      <% if (mongodb) { %>
+      - MONGO_URL=mongodb://admin:godspeed@mongodb1,mongodb2,mongodb3:<%=mongodb.ports[1]%>/<%=mongodb.dbName%>
+      <% } %>
+      <% if (postgresql) { %>
+      - POSTGRES_URL=postgresql://postgres:postgres@postgres:<%=postgresql.port%>/<%=postgresql.dbName%>
+      <% } %>
+      <% if (mysql) { %>
+      - MYSQL_URL=mysql://root:root@mysql:3306/<%=mysql.dbName%>
+      <% } %>      
+      - PORT=<%=servicePort%>
+    volumes:
+      - ..:/workspace/development/app:cached
+      - ./scripts:/scripts
+    working_dir: /workspace/development/app
+    ports:
+      - <%=servicePort%>:<%=servicePort%>
+<% if (elasticsearch || mongodb || postgresql || kafka || redis) { %>
+    depends_on:
+<% if (mongodb) { %>
+      - mongodb1
+<% } %>
+<% if (postgresql) { %>
+      - postgres
+<% } %>
+<% if (elasticsearch) { %>
+      - elasticsearch
+<% } %>
+<% if (kafka) { %>
+      - kafka
+<% } %>
+<% if (redis) { %>
+      - redis
+<% } %>
+<% } %>
+
+<% if (elasticsearch) { %>
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+    environment:
+      - node.name=es01
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - <%=elasticsearch.port%>:9200
+<% } %>
+
+<% if (mysql) { %>
+  mysql:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password --lower_case_table_names=1
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=<%=mysql.dbName%>
+    volumes:
+      - mysql-data:/var/lib/mysql      
+    ports:
+    - <%=mysql.port%>:3306
+
+<% } %>
+
+<% if (postgresql) { %>
+  postgres:
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - <%=postgresql.port%>:5432
+    volumes:
+      - postgresql-data:/var/lib/postgresql/data
+<% } %>
+
+<% if (kafka) { %>
+  zookeeper:
+    image: docker.io/bitnami/zookeeper:3.8
+    ports:
+      - <%=kafka.zookeeperPort%>:2181
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+  kafka:
+    image: docker.io/bitnami/kafka:3.1
+    ports:
+      - <%=kafka.kafkaPort%>:9092
+      - 9094:9094
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_LISTENERS=INTERNAL://0.0.0.0:9092,OUTSIDE://0.0.0.0:9094
+      - KAFKA_ADVERTISED_LISTENERS=INTERNAL://kafka:9092,OUTSIDE://kafka:9094
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT
+      - KAFKA_INTER_BROKER_LISTENER_NAME=INTERNAL
+    depends_on:
+      - zookeeper
+<% } %>
+<% if (redis) { %>
+  redis:
+    image: redis:7.0
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    ports:
+      - <%=redis.port%>:6379
+<% } %>
+<% if (mongodb) { %>
+  mongodb1:
+    image: mongo:5.0
+    volumes:
+      - mongodb1-data:/data/db
+      - ./scripts:/scripts
+    ports:
+      - <%=mongodb.ports[0]%>:27017
+    depends_on:
+      - mongodb2
+      - mongodb3
+    restart: always
+    command: 'bash -c "/scripts/mongodb_init.sh"'
+
+  mongodb2:
+    image: mongo:5.0
+    volumes:
+      - mongodb2-data:/data/db
+      - ./scripts:/scripts
+    ports:
+      - <%=mongodb.ports[1]%>:27017
+    restart: always
+    command: 'bash -c "/scripts/mongodb_init.sh"'
+
+  mongodb3:
+    image: mongo:5.0
+    volumes:
+      - mongodb3-data:/data/db
+      - ./scripts:/scripts
+    ports:
+      - <%=mongodb.ports[2]%>:27017
+    restart: always
+    command: 'bash -c "/scripts/mongodb_init.sh"'
+<% } %>
+<% if (elasticsearch || postgresql || kafka || mongodb || mysql ) { %>
+volumes:
+<% if (elasticsearch) { %>
+  elasticsearch-data:
+<% } %>
+<% if (postgresql) { %>
+  postgresql-data:
+<% } %>
+
+<% if (mysql) { %>
+  mysql-data:
+<% } %>
+
+<% if (kafka) { %>
+  kafka-data:
+  zookeeper-data:
+<% } %>
+<% if (mongodb) { %>
+  mongodb1-data:
+  mongodb2-data:
+  mongodb3-data:
+<% } %>
+<% } %>

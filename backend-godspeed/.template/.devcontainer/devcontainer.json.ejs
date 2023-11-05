@@ -1,0 +1,29 @@
+{
+  "name": "<%=projectName%>",
+  "forwardPorts": [
+    <%=servicePort%>
+  ],
+  "remoteUser": "node",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.profiles.linux": {
+          "node bash": {
+            "path": "/bin/bash"
+          }
+        },
+        "terminal.integrated.defaultProfile.linux": "node bash",
+        "debug.node.autoAttach": "disabled"
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "emeraldwalk.RunOnSave",
+        "zero8.godspeed"
+      ]
+    }
+  },
+  "dockerComposeFile": "./docker-compose.yml",
+  "shutdownAction": "stopCompose",
+  "service": "node",
+  "workspaceFolder": "/workspace/development/app"
+}

@@ -1,0 +1,88 @@
+# ONE
+http.get./mongo/post/{id}:
+  summary: Fetch Post
+  description: Fetch Post from database
+  fn: com.biz.mongo.post.one
+  params:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    content:
+      application/json:
+        schema:
+          type: object
+
+# CREATE
+http.post./mongo/post:
+  summary: Create a new Post
+  description: Create Post from database
+  fn: com.biz.mongo.post.create
+  body:
+    content:
+      application/json:
+        schema:
+          $ref: '#/definitions/mongo/Post'
+  responses:
+    content:
+      application/json:
+        schema:
+          type: object
+
+# UPDATE
+http.put./mongo/post/{id}:
+  summary: Update a Post
+  description: Update Post from database
+  fn: com.biz.mongo.post.update
+  body:
+    content:
+      application/json:
+        schema:
+          $ref: '#/definitions/mongo/Post'
+  params:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    content:
+      application/json:
+        schema:
+          type: object
+
+# DELETE
+http.delete./mongo/post/{id}:
+  summary: Delete a Post
+  description: Delete Post from database
+  fn: com.biz.mongo.post.delete
+  params:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    content:
+      application/json:
+        schema:
+          type: object
+
+# SEARCH
+http.post./mongo/post/search:
+  summary: Fetch multiple Post
+  description: Fetch multiple Post from database
+  fn: com.biz.mongo.post.search
+  body:
+    content:
+      application/json:
+        schema:
+          type: object
+  responses:
+    content:
+      application/json:
+        schema:
+          type: array
+

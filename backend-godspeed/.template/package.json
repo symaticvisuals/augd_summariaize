@@ -1,0 +1,31 @@
+{
+  "name": "godspeed-project",
+  "version": "1.0.0",
+  "description": "My first godspeed project.",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "nodemon -r dotenv ./src/index.ts",
+    "gen-crud-api": "npx @godspeedsystems/api-generator"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/config": "^3.3.0",
+    "@types/node": "^18.14.2",
+    "nodemon": "^2.0.20",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "@godspeedsystems/api-generator": "latest",
+    "@godspeedsystems/core": "latest",
+    "@godspeedsystems/plugins-express-as-http": "latest",
+    "@godspeedsystems/plugins-prisma-as-datastore": "latest",
+    "@godspeedsystems/plugins-axios-as-datasource": "latest",
+    "@prisma/client": "^5.2.0",
+    "config": "^3.3.9",
+    "dotenv": "^16.0.3",
+    "pino-pretty": "^10.2.0",
+    "prisma": "^5.2.0"
+  }
+}

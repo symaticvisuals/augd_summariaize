@@ -1,0 +1,6 @@
+id: helloworld
+tasks:
+  - id: fist_task
+    fn: com.gs.return
+    args:
+      name: 'Hello World!'
